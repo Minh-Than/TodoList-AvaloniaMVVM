@@ -1,0 +1,77 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TodoList_AvaloniaMVVM.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="TodoList_AvaloniaMVVM.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="TodoList_AvaloniaMVVM">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+    
+    <!-- Grid that has a name to access -->
+    <Grid RowDefinitions="Auto, *, Auto" 
+          Margin="10" 
+          x:Name="Root">
+        <!-- Title text block -->
+        <TextBlock Text="To Do List" 
+                   Classes="h1"/>
+        
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding TodoItems}">
+                <ItemsControl.ItemTemplate>
+                    <!--  The ItemTemplate defines how each item should be represented  -->
+                    <!--  Our Item will be represented by a CheckBox and a Delete-Button  -->
+                    <DataTemplate DataType="vm:TodoItemViewModel">
+                        <!-- AN ITEM ROW -->
+                        <Grid ColumnDefinitions="*, Auto, Auto">
+                            <!-- CHECKBOX / UPDATE TEXT FIELD -->
+                            <CheckBox IsVisible="{Binding !IsEditMode}" 
+                                      Content="{Binding Content}"
+                                      IsChecked="{Binding IsChecked}"
+                                      Grid.Column="0" />
+                            <TextBox IsVisible="{Binding IsEditMode}"
+                                     Text="{Binding EditItemContent, 
+                                        FallbackValue=''}"
+                                     Grid.Column="0" />
+                            <!-- EDIT BUTTON -->
+                            <Button Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).EditItemCommand,
+                                        FallbackValue=''}" 
+                                    CommandParameter="{Binding .}"
+                                    Content="{Binding EditSave}"
+                                    Grid.Column="1" />
+                            <!-- DELETE BUTTON -->
+                            <!--  Note how we use the Root-Grid to get the MainViewModel here. As we use compiled bindings we have to cast the DataContext  -->
+                            <Button Command="{Binding #Root.((vm:MainWindowViewModel)DataContext).RemoveItemCommand,
+                                        FallbackValue=''}"
+                                    CommandParameter="{Binding .}"
+                                    Grid.Column="2">
+                                Delete
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+        <TextBox Grid.Row="2" 
+                 Text="{Binding NewItemContent}"
+                 Watermark="Add new task">
+            <TextBox.InnerRightContent>
+                <Button Command="{Binding AddItemCommand}">
+                    Add
+                </Button>
+            </TextBox.InnerRightContent>
+            <TextBox.KeyBindings>
+                <KeyBinding Command="{Binding AddItemCommand}" 
+                            Gesture="Enter"></KeyBinding>
+            </TextBox.KeyBindings>
+        </TextBox>
+    </Grid>
+</Window>
